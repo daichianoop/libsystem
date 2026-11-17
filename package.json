@@ -13,7 +13,6 @@
     "seed:demo": "tsx scripts/seed-demo.ts"
   },
   "dependencies": {
-    "@clerk/nextjs": "^7.10.2",
     "@supabase/supabase-js": "^2.49.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",

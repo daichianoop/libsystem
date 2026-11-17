@@ -1,7 +1,7 @@
 import { requireRole } from "@/lib/server/auth";
 import Link from "next/link";
-import { UserButton } from "@clerk/nextjs";
-import { QrCode, History, User } from "lucide-react";
+import { UserMenu } from "@/components/layout/user-menu";
+import { QrCode, History } from "lucide-react";
 
 export default async function StudentLayout({
   children,
@@ -24,10 +24,7 @@ export default async function StudentLayout({
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-ash hidden sm:inline">{student.fullName || student.username}</span>
-          <UserButton />
-        </div>
+        <UserMenu fullName={student.fullName} role={student.role} />
       </header>
 
       {/* Main Surface */}

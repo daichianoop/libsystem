@@ -1,56 +1,66 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
+import { SESSION_COOKIE_NAME, decodeSessionToken } from "@/lib/session-token";
 
-// Define route matchers
-const isPublicRoute = createRouteMatcher([
+// Public routes that never require authentication
+const PUBLIC_PATHS = [
   "/",
-  "/sign-in(.*)",
+  "/sign-in",
   "/closed",
   "/api/health",
-  "/api/webhooks/clerk",
-]);
+  "/api/auth/login",
+  "/api/auth/logout",
+];
 
-const isAdminRoute = createRouteMatcher(["/admin(.*)", "/api/students(.*)", "/api/settings(.*)", "/api/access-(.*)"]);
-const isScannerRoute = createRouteMatcher(["/scanner(.*)", "/api/scans(.*)"]);
-const isStudentRoute = createRouteMatcher(["/student(.*)", "/api/tag(.*)"]);
+export function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
 
-export default clerkMiddleware(async (auth, req) => {
-  // If public route, allow immediately
-  if (isPublicRoute(req)) {
+  // 1. Allow public routes immediately
+  if (PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
     return NextResponse.next();
   }
 
-  const { userId, sessionClaims } = await auth();
+  // 2. Read session cookie
+  const sessionCookie = req.cookies.get(SESSION_COOKIE_NAME);
+  const session = sessionCookie ? decodeSessionToken(sessionCookie.value) : null;
 
-  // If unauthenticated, redirect to sign-in
-  if (!userId) {
+  // 3. Gating unauthenticated requests
+  if (!session) {
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json(
+        { error: { code: "UNAUTHORIZED", message: "Authentication required" } },
+        { status: 401 }
+      );
+    }
     const signInUrl = new URL("/sign-in", req.url);
     signInUrl.searchParams.set("redirect_url", req.url);
     return NextResponse.redirect(signInUrl);
   }
 
-  // Extract role from session claims (Clerk publicMetadata)
-  const userRole = (sessionClaims?.metadata as any)?.role || (sessionClaims as any)?.role || "student";
-
-  // Role Gate: Admin routes
-  if (isAdminRoute(req) && userRole !== "admin") {
-    // Non-admin attempting to access /admin
-    if (req.nextUrl.pathname.startsWith("/api/")) {
+  // 4. Role Gating: Admin surfaces
+  if (
+    (pathname.startsWith("/admin") ||
+      pathname.startsWith("/api/students") ||
+      pathname.startsWith("/api/settings") ||
+      pathname.startsWith("/api/access-")) &&
+    session.role !== "admin"
+  ) {
+    if (pathname.startsWith("/api/")) {
       return NextResponse.json(
         { error: { code: "FORBIDDEN", message: "Admin privileges required" } },
         { status: 403 }
       );
     }
-    // Redirect non-admin to their respective home
-    if (userRole === "scanner") {
-      return NextResponse.redirect(new URL("/scanner", req.url));
-    }
-    return NextResponse.redirect(new URL("/student/home", req.url));
+    const fallbackUrl = session.role === "scanner" ? "/scanner" : "/student/home";
+    return NextResponse.redirect(new URL(fallbackUrl, req.url));
   }
 
-  // Role Gate: Scanner routes
-  if (isScannerRoute(req) && userRole !== "scanner" && userRole !== "admin") {
-    if (req.nextUrl.pathname.startsWith("/api/")) {
+  // 5. Role Gating: Scanner surfaces
+  if (
+    (pathname.startsWith("/scanner") || pathname.startsWith("/api/scans")) &&
+    session.role !== "scanner" &&
+    session.role !== "admin"
+  ) {
+    if (pathname.startsWith("/api/")) {
       return NextResponse.json(
         { error: { code: "FORBIDDEN", message: "Scanner privileges required" } },
         { status: 403 }
@@ -59,9 +69,13 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.redirect(new URL("/student/home", req.url));
   }
 
-  // Role Gate: Student routes
-  if (isStudentRoute(req) && userRole !== "student" && userRole !== "admin") {
-    if (req.nextUrl.pathname.startsWith("/api/")) {
+  // 6. Role Gating: Student surfaces
+  if (
+    (pathname.startsWith("/student") || pathname.startsWith("/api/tag")) &&
+    session.role !== "student" &&
+    session.role !== "admin"
+  ) {
+    if (pathname.startsWith("/api/")) {
       return NextResponse.json(
         { error: { code: "FORBIDDEN", message: "Student privileges required" } },
         { status: 403 }
@@ -70,27 +84,12 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.redirect(new URL("/scanner", req.url));
   }
 
-  // Stub for Phase 1 time window enforcement (will query access_windows in Phase 3)
-  // Admins are never locked out
-  const isTimeWindowStubActive = false; // Stubbed for Phase 1
-  if (isTimeWindowStubActive && userRole !== "admin") {
-    if (req.nextUrl.pathname.startsWith("/api/")) {
-      return NextResponse.json(
-        { error: { code: "OUTSIDE_ACCESS_WINDOW", message: "System is closed at this time." } },
-        { status: 403 }
-      );
-    }
-    return NextResponse.redirect(new URL("/closed", req.url));
-  }
-
   return NextResponse.next();
-});
+}
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
     "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-    // Always run for API routes
     "/(api|trpc)(.*)",
   ],
 };

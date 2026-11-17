@@ -1,6 +1,6 @@
 import { requireRole } from "@/lib/server/auth";
 import Link from "next/link";
-import { UserButton } from "@clerk/nextjs";
+import { UserMenu } from "@/components/layout/user-menu";
 import { LayoutDashboard, Users, QrCode, Sliders, Clock, ShieldAlert, FileText } from "lucide-react";
 
 export default async function AdminLayout({
@@ -35,7 +35,7 @@ export default async function AdminLayout({
               <p className="text-xs text-ash mt-0.5">Hostel & Library Movement</p>
             </div>
             <div className="md:hidden">
-              <UserButton />
+              <UserMenu fullName={admin.fullName} role={admin.role} />
             </div>
           </div>
 
@@ -59,11 +59,7 @@ export default async function AdminLayout({
 
         {/* User Footer */}
         <div className="hidden md:flex p-4 border-t border-border items-center justify-between">
-          <div className="flex flex-col min-w-0">
-            <span className="text-xs font-semibold text-whitesmoke truncate">{admin.fullName || admin.username}</span>
-            <span className="text-[11px] text-accent uppercase font-mono tracking-wider">Admin</span>
-          </div>
-          <UserButton />
+          <UserMenu fullName={admin.fullName} role={admin.role} />
         </div>
       </aside>
 

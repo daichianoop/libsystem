@@ -1,12 +1,11 @@
-import { clerk } from "../lib/server/clerk";
 import { getAdminSupabase } from "../lib/server/supabase";
 import { env } from "../lib/env";
 
 async function seedAdmin() {
-  console.log("=== Seeding Initial System Administrator ===");
+  console.log("=== Seeding Initial System Administrator (Local / DB) ===");
 
-  const username = env.INITIAL_ADMIN_USERNAME || "admin.central";
-  const password = env.INITIAL_ADMIN_PASSWORD || "AdminSecurePass#2026!";
+  const username = env.INITIAL_ADMIN_USERNAME || "admin";
+  const password = env.INITIAL_ADMIN_PASSWORD || "admin123";
   const fullName = "Central Library Administrator";
 
   try {
@@ -21,36 +20,18 @@ async function seedAdmin() {
       .maybeSingle();
 
     if (existingProfile) {
-      console.log(`[Info] Admin profile already exists in Supabase (id: ${existingProfile.id}, username: ${existingProfile.username}).`);
+      console.log(`[Info] Admin profile already exists in database (id: ${existingProfile.id}, username: ${existingProfile.username}).`);
+      console.log(`Username: ${existingProfile.username} | Password: ${password}`);
       return;
     }
 
-    let clerkUser;
-    // Check if user exists in Clerk
-    const clerkUsers = await clerk.users.getUserList({ username: [username] });
-    if (clerkUsers.data.length > 0) {
-      clerkUser = clerkUsers.data[0];
-      console.log(`[Info] Clerk user already exists: ${clerkUser.id}`);
-    } else {
-      console.log(`[Info] Creating Clerk user: ${username}...`);
-      clerkUser = await clerk.users.createUser({
-        username,
-        password,
-        firstName: "Central Library",
-        lastName: "Administrator",
-        publicMetadata: {
-          role: "admin",
-        },
-        skipPasswordChecks: true,
-      });
-      console.log(`[Success] Clerk admin created successfully! ID: ${clerkUser.id}`);
-    }
+    const clerkUserId = `local_admin_${Date.now()}`;
 
     // Insert into Supabase profiles
     const { data: profile, error } = await supabase
       .from("profiles")
       .insert({
-        clerk_user_id: clerkUser.id,
+        clerk_user_id: clerkUserId,
         username,
         role: "admin",
         full_name: fullName,
@@ -65,20 +46,11 @@ async function seedAdmin() {
       return;
     }
 
-    // Update clerk publicMetadata with profile_id
-    await clerk.users.updateUser(clerkUser.id, {
-      publicMetadata: {
-        role: "admin",
-        profile_id: profile.id,
-      },
-    });
-
     console.log("\n========================================================");
-    console.log(" INITIAL ADMIN CREDENTIALS (SHOWN ONCE)");
+    console.log(" INITIAL ADMIN CREDENTIALS");
     console.log("========================================================");
     console.log(` Username: ${username}`);
     console.log(` Password: ${password}`);
-    console.log(" Rotate this password immediately after your first sign-in!");
     console.log("========================================================\n");
   } catch (err: any) {
     console.error("[Error] Seeding admin failed:", err?.message || err);

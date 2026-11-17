@@ -1,5 +1,5 @@
-import { SignOutButton } from "@clerk/nextjs";
-import { Clock, ShieldAlert } from "lucide-react";
+import Link from "next/link";
+import { Clock, ShieldAlert, LogOut } from "lucide-react";
 
 export default function ClosedWindowPage() {
   return (
@@ -31,11 +31,13 @@ export default function ClosedWindowPage() {
         </div>
 
         <div className="pt-2">
-          <SignOutButton>
-            <button className="w-full py-2.5 px-4 bg-surface-raised hover:bg-border text-whitesmoke text-sm font-medium rounded-lg transition-colors border border-border">
-              Sign Out Securely
-            </button>
-          </SignOutButton>
+          <Link
+            href="/api/auth/logout"
+            className="w-full py-2.5 px-4 bg-surface-raised hover:bg-border text-whitesmoke text-sm font-medium rounded-lg transition-colors border border-border flex items-center justify-center gap-2"
+          >
+            <LogOut className="w-4 h-4 text-ash" />
+            <span>Sign Out Securely</span>
+          </Link>
         </div>
       </div>
     </div>

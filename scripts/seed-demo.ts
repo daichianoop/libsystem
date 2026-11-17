@@ -1,15 +1,6 @@
-import { clerk } from "../lib/server/clerk";
 import { getAdminSupabase } from "../lib/server/supabase";
 import { generateUsername } from "../lib/username";
 import { generateHashCode } from "../lib/hashcode";
-
-interface DemoStudentRaw {
-  fullName: string;
-  category: "1st Year" | "2nd Year" | "3rd Year" | "4th Year";
-  department: string;
-  hostel: string;
-  rollNumber: string;
-}
 
 const DEMO_STUDENT_NAMES: Record<"1st Year" | "2nd Year" | "3rd Year" | "4th Year", string[]> = {
   "1st Year": [
@@ -86,7 +77,7 @@ async function seedDemoData() {
   let yearIndex = 0;
   for (const category of years) {
     const studentNames = DEMO_STUDENT_NAMES[category];
-    const yearPrefix = (2026 - (4 - yearIndex)).toString().slice(-2); // 23, 24, 25, 26
+    const yearPrefix = (2026 - (4 - yearIndex)).toString().slice(-2);
 
     for (let i = 0; i < studentNames.length; i++) {
       const name = studentNames[i];
@@ -98,25 +89,7 @@ async function seedDemoData() {
       const hashCode = generateHashCode(existingCodes);
       existingCodes.push(hashCode);
 
-      let clerkUserId = `mock_clerk_${username}_${Date.now()}`;
-
-      // If valid Clerk keys are present, attempt creating in Clerk
-      try {
-        const createdClerkUser = await clerk.users.createUser({
-          username,
-          password: hashCode,
-          firstName: name.split(" ")[0],
-          lastName: name.split(" ").slice(1).join(" "),
-          publicMetadata: {
-            role: "student",
-          },
-          skipPasswordChecks: true,
-        });
-        clerkUserId = createdClerkUser.id;
-      } catch (err: any) {
-        // Fallback for offline/test environments without active Clerk internet connectivity
-        console.warn(`[Notice] Clerk online registration skipped for ${username} (using simulated ID).`);
-      }
+      const clerkUserId = `local_student_${username}`;
 
       // Insert profile into Supabase
       const { data: profile, error: profileErr } = await supabase
@@ -152,7 +125,7 @@ async function seedDemoData() {
             category,
             department,
             hostel,
-            in_library: i % 4 === 0 ? 1 : 0, // Seed a few students as currently inside (in_library = 1)
+            in_library: i % 4 === 0 ? 1 : 0,
           },
           { onConflict: "roll_number" }
         );
@@ -177,7 +150,7 @@ async function seedDemoData() {
 
   // 4. Print Credentials Report Table ONCE
   console.log("\n==========================================================================================");
-  console.log("            DEMO STUDENT CREDENTIALS SHEET (SHOWN EXACTLY ONCE UPON SEEDING)             ");
+  console.log("            DEMO STUDENT CREDENTIALS SHEET (LOCAL AUTHENTICATION)                        ");
   console.log("==========================================================================================");
   console.log(
     "Roll No".padEnd(12) +
@@ -200,7 +173,10 @@ async function seedDemoData() {
 
   console.log("==========================================================================================");
   console.log(`Successfully registered and seeded ${issuedCredentials.length} students across 1st Year to 4th Year.`);
-  console.log("Note: Hash codes are not stored in plaintext in the database.");
+  console.log("Hardcoded Quick Logins:");
+  console.log("Admin:   admin   / admin123");
+  console.log("Scanner: scanner / scanner123");
+  console.log("Student: student / student123");
   console.log("==========================================================================================\n");
 }
 

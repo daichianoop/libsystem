@@ -1,17 +1,8 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
-import { getAdminSupabase } from "./supabase";
+import { getSessionUser, SessionUser } from "./session";
 
 export type UserRole = "admin" | "scanner" | "student" | "warden";
 
-export interface AuthenticatedUser {
-  clerkUserId: string;
-  profileId: string;
-  username: string;
-  role: UserRole;
-  fullName: string;
-  isActive: boolean;
-  mustChangePassword: boolean;
-}
+export interface AuthenticatedUser extends SessionUser {}
 
 export class AuthError extends Error {
   statusCode: number;
@@ -26,53 +17,19 @@ export class AuthError extends Error {
 }
 
 /**
- * Retrieves the current authenticated user and their Supabase profile.
+ * Retrieves the current authenticated user from the active session.
  */
 export async function getCurrentUser(): Promise<AuthenticatedUser | null> {
-  const session = await auth();
-  if (!session || !session.userId) {
-    return null;
-  }
-
-  const supabase = getAdminSupabase();
-  const { data: profile, error } = await supabase
-    .from("profiles")
-    .select("id, clerk_user_id, username, role, full_name, is_active, must_change_password")
-    .eq("clerk_user_id", session.userId)
-    .single();
-
-  if (error || !profile) {
-    // If not in DB yet, fallback to Clerk metadata
-    const roleFromMeta = (session.sessionClaims?.metadata as any)?.role || "student";
-    return {
-      clerkUserId: session.userId,
-      profileId: (session.sessionClaims?.metadata as any)?.profile_id || "",
-      username: "",
-      role: roleFromMeta as UserRole,
-      fullName: "",
-      isActive: true,
-      mustChangePassword: false,
-    };
-  }
-
-  return {
-    clerkUserId: profile.clerk_user_id,
-    profileId: profile.id,
-    username: profile.username,
-    role: profile.role as UserRole,
-    fullName: profile.full_name,
-    isActive: profile.is_active,
-    mustChangePassword: profile.must_change_password,
-  };
+  return await getSessionUser();
 }
 
 /**
- * Asserts the request has a valid authenticated session.
+ * Asserts the request has an active authenticated session.
  */
 export async function requireAuth(): Promise<AuthenticatedUser> {
   const user = await getCurrentUser();
   if (!user) {
-    throw new AuthError("Authentication required", 401, "UNAUTHENTICATED");
+    throw new AuthError("Authentication required. Please sign in.", 401, "UNAUTHENTICATED");
   }
   if (!user.isActive) {
     throw new AuthError("Account is inactive or suspended", 403, "ACCOUNT_INACTIVE");
@@ -81,8 +38,7 @@ export async function requireAuth(): Promise<AuthenticatedUser> {
 }
 
 /**
- * Asserts that the authenticated user has one of the allowed roles.
- * Never trusts role sent by the client.
+ * Asserts that the authenticated user possesses one of the allowed roles.
  */
 export async function requireRole(allowedRoles: UserRole[]): Promise<AuthenticatedUser> {
   const user = await requireAuth();

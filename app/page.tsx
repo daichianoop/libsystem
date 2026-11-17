@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { auth } from "@clerk/nextjs/server";
-import { UserButton } from "@clerk/nextjs";
+import { getCurrentUser } from "@/lib/server/auth";
+import { UserMenu } from "@/components/layout/user-menu";
 import {
   QrCode,
   Camera,
@@ -14,8 +14,7 @@ import {
 } from "lucide-react";
 
 export default async function LandingPage() {
-  const { userId, sessionClaims } = await auth();
-  const role = (sessionClaims?.metadata as any)?.role || (sessionClaims as any)?.role;
+  const user = await getCurrentUser();
 
   return (
     <div className="min-h-screen bg-bg text-whitesmoke flex flex-col justify-between selection:bg-accent selection:text-black">
@@ -43,22 +42,22 @@ export default async function LandingPage() {
               <span>Standard Window: <strong>17:00 – 23:30 IST</strong></span>
             </div>
 
-            {userId ? (
+            {user ? (
               <div className="flex items-center gap-3">
                 <Link
                   href={
-                    role === "admin"
+                    user.role === "admin"
                       ? "/admin/dashboard"
-                      : role === "scanner"
+                      : user.role === "scanner"
                       ? "/scanner"
                       : "/student/home"
                   }
                   className="px-3.5 py-1.5 rounded-lg bg-accent hover:bg-accent-hover text-black text-xs font-semibold transition-colors flex items-center gap-1.5"
                 >
-                  <span>My Dashboard</span>
+                  <span>My Portal</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
-                <UserButton />
+                <UserMenu fullName={user.fullName} role={user.role} />
               </div>
             ) : (
               <Link
@@ -87,8 +86,8 @@ export default async function LandingPage() {
         </h2>
 
         <p className="text-sm md:text-base text-ash max-w-2xl mx-auto leading-relaxed">
-          Select your destination below to log in with your college credentials. The system guarantees
-          accurate occupancy metrics, prevents screenshot fraud, and strictly enforces campus access timings.
+          Select your destination below to log in. The system guarantees accurate occupancy metrics,
+          prevents screenshot fraud with rotating QR tags, and strictly enforces campus access timings.
         </p>
 
         {/* 3 Portal Selection Cards */}
@@ -118,12 +117,12 @@ export default async function LandingPage() {
 
               <div className="bg-surface-raised border border-border rounded-lg p-3 space-y-1.5 text-[11px] text-ash">
                 <div className="flex items-center justify-between">
-                  <span>Rotating QR Refresh:</span>
-                  <strong className="text-whitesmoke font-mono">Every 30s</strong>
+                  <span>Demo Login:</span>
+                  <strong className="text-accent font-mono">student / student123</strong>
                 </div>
                 <div className="flex items-center justify-between">
                   <span>Status Pill:</span>
-                  <span className="text-accent font-semibold">0 (Out) / 1 (In)</span>
+                  <span className="text-whitesmoke font-semibold">0 (Out) / 1 (In)</span>
                 </div>
               </div>
             </div>
@@ -164,8 +163,8 @@ export default async function LandingPage() {
 
               <div className="bg-surface-raised border border-border rounded-lg p-3 space-y-1.5 text-[11px] text-ash">
                 <div className="flex items-center justify-between">
-                  <span>Duplicate Debounce:</span>
-                  <strong className="text-whitesmoke font-mono">10s Guard</strong>
+                  <span>Demo Login:</span>
+                  <strong className="text-sand font-mono">scanner / scanner123</strong>
                 </div>
                 <div className="flex items-center justify-between">
                   <span>Concurrency Lock:</span>
@@ -210,8 +209,8 @@ export default async function LandingPage() {
 
               <div className="bg-surface-raised border border-border rounded-lg p-3 space-y-1.5 text-[11px] text-ash">
                 <div className="flex items-center justify-between">
-                  <span>Student Provisioning:</span>
-                  <strong className="text-whitesmoke font-mono">CSPRNG Hash Codes</strong>
+                  <span>Demo Login:</span>
+                  <strong className="text-accent font-mono">admin / admin123</strong>
                 </div>
                 <div className="flex items-center justify-between">
                   <span>Audit Trail:</span>
@@ -290,7 +289,7 @@ export default async function LandingPage() {
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <p>© {new Date().getFullYear()} Central Library & Hostel Board. All rights reserved.</p>
           <div className="flex items-center gap-4 text-[11px]">
-            <span>Free Tier Production Optimized</span>
+            <span>Hardcoded / Database Local Auth</span>
             <span>•</span>
             <Link href="/api/health" className="hover:text-whitesmoke underline underline-offset-4">
               System Health Check

@@ -1,16 +1,22 @@
 import { requireRole } from "@/lib/server/auth";
 import { getAdminSupabase } from "@/lib/server/supabase";
-import { UserButton } from "@clerk/nextjs";
+import { UserMenu } from "@/components/layout/user-menu";
 import { Camera, QrCode, Shield, MapPin } from "lucide-react";
 
 export default async function ScannerPage() {
   const scannerUser = await requireRole(["scanner", "admin"]);
   const supabase = getAdminSupabase();
 
-  const { data: checkpoints } = await supabase
-    .from("checkpoints")
-    .select("*")
-    .eq("is_active", true);
+  let checkpoints: any[] = [];
+  try {
+    const { data } = await supabase
+      .from("checkpoints")
+      .select("*")
+      .eq("is_active", true);
+    if (data) checkpoints = data;
+  } catch {
+    // Fallback if offline
+  }
 
   return (
     <div className="min-h-screen bg-bg flex flex-col justify-between">
@@ -20,10 +26,7 @@ export default async function ScannerPage() {
           <Camera className="w-5 h-5 text-accent" />
           <h1 className="text-base font-bold text-whitesmoke">Library Checkpoint Scanner</h1>
         </div>
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-ash font-mono">{scannerUser.username}</span>
-          <UserButton />
-        </div>
+        <UserMenu fullName={scannerUser.fullName} role={scannerUser.role} />
       </header>
 
       {/* Viewfinder Canvas Area */}
@@ -35,11 +38,19 @@ export default async function ScannerPage() {
           </div>
 
           <select className="w-full bg-surface-raised border border-border text-whitesmoke rounded-lg p-2.5 text-sm focus:ring-accent focus:border-accent">
-            {checkpoints?.map((cp) => (
-              <option key={cp.id} value={cp.id}>
-                {cp.name} ({cp.type})
-              </option>
-            )) || <option>Main Gate (Both)</option>}
+            {checkpoints.length > 0 ? (
+              checkpoints.map((cp) => (
+                <option key={cp.id} value={cp.id}>
+                  {cp.name} ({cp.type})
+                </option>
+              ))
+            ) : (
+              <>
+                <option value="cp-1">Main Gate Entrance (Both)</option>
+                <option value="cp-2">North Turnstile (Entry Only)</option>
+                <option value="cp-3">South Turnstile (Exit Only)</option>
+              </>
+            )}
           </select>
 
           {/* Camera Frame Preview */}
