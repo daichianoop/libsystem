@@ -1,7 +1,8 @@
 import { requireRole } from "@/lib/server/auth";
-import Link from "next/link";
 import { UserMenu } from "@/components/layout/user-menu";
-import { LayoutDashboard, Users, QrCode, Sliders, Clock, ShieldAlert, FileText } from "lucide-react";
+import { AdminNav } from "@/components/layout/admin-nav";
+import Link from "next/link";
+import { ExternalLink, QrCode } from "lucide-react";
 
 export default async function AdminLayout({
   children,
@@ -10,16 +11,6 @@ export default async function AdminLayout({
 }) {
   const admin = await requireRole(["admin"]);
 
-  const navItems = [
-    { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-    { label: "Students", href: "/admin/students", icon: Users },
-    { label: "Scanners", href: "/admin/scanners", icon: QrCode },
-    { label: "Access Windows", href: "/admin/access-windows", icon: Clock },
-    { label: "Logs & Audit", href: "/admin/logs", icon: ShieldAlert },
-    { label: "Reports", href: "/admin/reports", icon: FileText },
-    { label: "Settings", href: "/admin/settings", icon: Sliders },
-  ];
-
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-bg">
       {/* Desktop Sidebar */}
@@ -27,38 +18,42 @@ export default async function AdminLayout({
         <div>
           {/* Logo & Header */}
           <div className="p-5 border-b border-border flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-accent animate-pulse" />
-                <h2 className="text-base font-bold text-whitesmoke tracking-tight">Library Admin</h2>
+            <Link href="/" className="group flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-surface-raised border border-border flex items-center justify-center font-mono font-bold text-accent text-sm group-hover:border-accent transition-colors">
+                LP
               </div>
-              <p className="text-xs text-ash mt-0.5">Hostel & Library Movement</p>
-            </div>
+              <div>
+                <h2 className="text-sm font-bold text-whitesmoke tracking-tight group-hover:text-accent transition-colors">
+                  Library Admin
+                </h2>
+                <p className="text-[11px] text-ash">Movement Governance</p>
+              </div>
+            </Link>
             <div className="md:hidden">
               <UserMenu fullName={admin.fullName} role={admin.role} />
             </div>
           </div>
 
-          {/* Nav links */}
-          <nav className="p-3 space-y-1">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="flex items-center gap-3 px-3.5 py-2.5 rounded-lg text-sm font-medium text-ash hover:text-whitesmoke hover:bg-surface-raised transition-colors"
-                >
-                  <Icon className="w-4 h-4 text-sand" />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
+          {/* Quick Scanner Launch Pill */}
+          <div className="p-3 pb-1">
+            <Link
+              href="/scanner"
+              className="w-full py-2 px-3 rounded-lg bg-surface-raised border border-border hover:border-accent/60 text-xs font-semibold text-whitesmoke flex items-center justify-between transition-colors group"
+            >
+              <div className="flex items-center gap-2">
+                <QrCode className="w-3.5 h-3.5 text-accent" />
+                <span>Scanner Terminal</span>
+              </div>
+              <ExternalLink className="w-3 h-3 text-ash group-hover:text-whitesmoke" />
+            </Link>
+          </div>
+
+          {/* Navigation Links with Active State */}
+          <AdminNav />
         </div>
 
         {/* User Footer */}
-        <div className="hidden md:flex p-4 border-t border-border items-center justify-between">
+        <div className="hidden md:flex p-4 border-t border-border items-center justify-between bg-surface-raised">
           <UserMenu fullName={admin.fullName} role={admin.role} />
         </div>
       </aside>

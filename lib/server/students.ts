@@ -595,3 +595,149 @@ export async function exportStudentsCSV(params: StudentFilterParams = {}): Promi
 
   return [headers.join(","), ...rows.map((r) => r.join(","))].join("\r\n");
 }
+
+/**
+ * Retrieves student by roll number.
+ */
+export async function getStudentByRoll(rollNumber: string): Promise<StudentRecord | null> {
+  initializeDemoStudents();
+  const cleanRoll = rollNumber.trim().toUpperCase();
+  for (const s of studentsMap.values()) {
+    if (s.rollNumber.toUpperCase() === cleanRoll) {
+      const { passwordHash: _, cardSecret: __, ...safe } = s;
+      return safe;
+    }
+  }
+  return null;
+}
+
+/**
+ * Retrieves the student's cardSecret for token signing or verification (server-internal only).
+ */
+export function getStudentCardSecret(studentId: string): string | null {
+  initializeDemoStudents();
+  const s = studentsMap.get(studentId);
+  return s ? s.cardSecret : null;
+}
+
+export interface CheckpointRecord {
+  id: string;
+  name: string;
+  type: "LIBRARY_ENTRY" | "LIBRARY_EXIT" | "LIBRARY_BOTH";
+  isActive: boolean;
+}
+
+const CHECKPOINTS_STORE: CheckpointRecord[] = [
+  { id: "cp-main", name: "Central Library Main Gate (Both)", type: "LIBRARY_BOTH", isActive: true },
+  { id: "cp-north", name: "North Turnstile (Entry Only)", type: "LIBRARY_ENTRY", isActive: true },
+  { id: "cp-south", name: "South Turnstile (Exit Only)", type: "LIBRARY_EXIT", isActive: true },
+];
+
+export async function getCheckpoints(): Promise<CheckpointRecord[]> {
+  return [...CHECKPOINTS_STORE];
+}
+
+export interface MovementEventRecord {
+  id: string;
+  studentId: string;
+  studentName: string;
+  rollNumber: string;
+  category: StudentCategory;
+  eventType: "LIBRARY_ENTRY" | "LIBRARY_EXIT" | "REJECTED_SCAN";
+  checkpointId: string;
+  checkpointName: string;
+  reasonCode: string;
+  message: string;
+  recordedAt: string;
+}
+
+const movementEventsLog: MovementEventRecord[] = [];
+
+/**
+ * Records an immutable movement event.
+ */
+export async function recordMovementEvent(params: {
+  studentId: string;
+  studentName: string;
+  rollNumber: string;
+  category: StudentCategory;
+  eventType: "LIBRARY_ENTRY" | "LIBRARY_EXIT" | "REJECTED_SCAN";
+  checkpointId: string;
+  checkpointName: string;
+  reasonCode: string;
+  message: string;
+}): Promise<MovementEventRecord> {
+  const event: MovementEventRecord = {
+    id: `ev_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+    ...params,
+    recordedAt: new Date().toISOString(),
+  };
+
+  movementEventsLog.unshift(event);
+  if (movementEventsLog.length > 200) {
+    movementEventsLog.pop();
+  }
+
+  return event;
+}
+
+/**
+ * Retrieves recent movement events with optional filtering.
+ */
+export async function getRecentMovementEvents(params?: {
+  studentId?: string;
+  limit?: number;
+}): Promise<MovementEventRecord[]> {
+  let list = [...movementEventsLog];
+  if (params?.studentId) {
+    list = list.filter((e) => e.studentId === params.studentId);
+  }
+  return list.slice(0, params?.limit || 20);
+}
+
+/**
+ * Transactionally updates student inLibrary status and lastScanAt.
+ */
+export async function updateStudentScanStatus(
+  studentId: string,
+  inLibrary: 0 | 1
+): Promise<StudentRecord> {
+  initializeDemoStudents();
+  const s = studentsMap.get(studentId);
+  if (!s) {
+    throw new Error(`Student ${studentId} not found`);
+  }
+
+  const now = new Date().toISOString();
+  s.inLibrary = inLibrary;
+  s.lastScanAt = now;
+  s.updatedAt = now;
+  studentsMap.set(studentId, s);
+
+  const { passwordHash: _, cardSecret: __, ...safe } = s;
+  return safe;
+}
+
+/**
+ * Returns occupancy statistics across categories and stay duration.
+ */
+export async function getOccupancyStats() {
+  initializeDemoStudents();
+  const all = Array.from(studentsMap.values());
+  const inLib = all.filter((s) => s.inLibrary === 1);
+
+  const categoryBreakdown: Record<StudentCategory, number> = {
+    "1st Year": inLib.filter((s) => s.category === "1st Year").length,
+    "2nd Year": inLib.filter((s) => s.category === "2nd Year").length,
+    "3rd Year": inLib.filter((s) => s.category === "3rd Year").length,
+    "4th Year": inLib.filter((s) => s.category === "4th Year").length,
+  };
+
+  return {
+    totalStudents: all.length,
+    inLibraryCount: inLib.length,
+    outsideCount: all.length - inLib.length,
+    categoryBreakdown,
+    recentEvents: movementEventsLog.slice(0, 15),
+  };
+}
