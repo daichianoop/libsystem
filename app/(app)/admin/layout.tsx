@@ -35,7 +35,7 @@ export default async function AdminLayout({
               <p className="text-xs text-ash mt-0.5">Hostel & Library Movement</p>
             </div>
             <div className="md:hidden">
-              <UserButton afterSignOutUrl="/sign-in" />
+              <UserButton />
             </div>
           </div>
 
@@ -63,7 +63,7 @@ export default async function AdminLayout({
             <span className="text-xs font-semibold text-whitesmoke truncate">{admin.fullName || admin.username}</span>
             <span className="text-[11px] text-accent uppercase font-mono tracking-wider">Admin</span>
           </div>
-          <UserButton afterSignOutUrl="/sign-in" />
+          <UserButton />
         </div>
       </aside>
 

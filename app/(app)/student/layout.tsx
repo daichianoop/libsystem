@@ -26,7 +26,7 @@ export default async function StudentLayout({
 
         <div className="flex items-center gap-3">
           <span className="text-xs text-ash hidden sm:inline">{student.fullName || student.username}</span>
-          <UserButton afterSignOutUrl="/sign-in" />
+          <UserButton />
         </div>
       </header>
 

@@ -22,7 +22,7 @@ export default async function ScannerPage() {
         </div>
         <div className="flex items-center gap-3">
           <span className="text-xs text-ash font-mono">{scannerUser.username}</span>
-          <UserButton afterSignOutUrl="/sign-in" />
+          <UserButton />
         </div>
       </header>
 
