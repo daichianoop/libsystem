@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { HARDCODED_ACCOUNTS, setSessionCookie, SessionUser } from "@/lib/server/session";
+import { authenticateStudent } from "@/lib/server/students";
 import { getAdminSupabase } from "@/lib/server/supabase";
 
 export async function POST(req: NextRequest) {
@@ -17,7 +18,7 @@ export async function POST(req: NextRequest) {
     const cleanUser = String(username).trim().toLowerCase();
     const cleanPass = String(password).trim();
 
-    // 1. Check Hardcoded Accounts First
+    // 1. Check Hardcoded Accounts First (for instant demo accounts)
     const match = HARDCODED_ACCOUNTS.find(
       (acc) =>
         acc.credentials.username.toLowerCase() === cleanUser &&
@@ -38,7 +39,32 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // 2. Check Database if Supabase is connected
+    // 2. Check Student Store / Registered Students
+    const student = await authenticateStudent(cleanUser, cleanPass);
+    if (student) {
+      const sessionUser: SessionUser = {
+        userId: student.profileId,
+        profileId: student.profileId,
+        username: student.username,
+        role: "student",
+        fullName: student.fullName,
+        rollNumber: student.rollNumber,
+        category: student.category,
+        department: student.department,
+        isActive: student.isActive,
+        mustChangePassword: false,
+      };
+
+      await setSessionCookie(sessionUser);
+
+      return NextResponse.json({
+        success: true,
+        user: sessionUser,
+        redirectUrl: "/student/home",
+      });
+    }
+
+    // 3. Check Supabase Database if connected
     try {
       const supabase = getAdminSupabase();
       const { data: profile } = await supabase
@@ -47,18 +73,17 @@ export async function POST(req: NextRequest) {
         .eq("username", cleanUser)
         .maybeSingle();
 
-      if (profile) {
-        // Build session user from DB
-        const student = profile.students?.[0] || profile.students;
+      if (profile && profile.is_active) {
+        const std = profile.students?.[0] || profile.students;
         const sessionUser: SessionUser = {
           userId: profile.id,
           profileId: profile.id,
           username: profile.username,
           role: profile.role,
           fullName: profile.full_name,
-          rollNumber: student?.roll_number,
-          category: student?.category,
-          department: student?.department,
+          rollNumber: std?.roll_number,
+          category: std?.category,
+          department: std?.department,
           isActive: profile.is_active,
           mustChangePassword: profile.must_change_password,
         };
@@ -76,7 +101,7 @@ export async function POST(req: NextRequest) {
         });
       }
     } catch {
-      // If DB query fails or is offline, continue to rejection
+      // Supabase is offline or not configured
     }
 
     return NextResponse.json(
