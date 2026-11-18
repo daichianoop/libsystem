@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
         const studentId = parts[parts.length - 3] === "static" ? parts[2] : parts[1];
         const student = await getStudentById(studentId);
         if (student) {
-          const cardSecret = getStudentCardSecret(student.id);
+          const cardSecret = await getStudentCardSecret(student.id);
           if (cardSecret) {
             const verification = verifyToken(token, cardSecret, undefined, student.credentialVersion);
             if (verification.valid) {

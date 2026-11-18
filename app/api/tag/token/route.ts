@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const cardSecret = getStudentCardSecret(student.id) || "fallback_secret_key_student_tag";
+    const cardSecret = (await getStudentCardSecret(student.id)) || "fallback_secret_key_student_tag";
     const bucket = getCurrentBucket();
     const token = generateRotatingToken(student.id, cardSecret, bucket);
 
