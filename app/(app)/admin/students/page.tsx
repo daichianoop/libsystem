@@ -22,6 +22,8 @@ import {
   Check,
   AlertCircle,
   HelpCircle,
+  Trash2,
+  Loader2,
 } from "lucide-react";
 import { StudentRecord } from "@/lib/server/students";
 import { AddStudentModal } from "@/components/students/add-student-modal";
@@ -90,6 +92,27 @@ function StudentsContent() {
   const [selectedStudentForDrawer, setSelectedStudentForDrawer] = useState<StudentRecord | null>(
     null
   );
+  const [deleteConfirmStudent, setDeleteConfirmStudent] = useState<StudentRecord | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteStudent = async (studentId: string) => {
+    setIsDeleting(true);
+    try {
+      const res = await fetch(`/api/students/${studentId}`, { method: "DELETE" });
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error?.message || "Failed to delete student");
+      }
+      setDeleteConfirmStudent(null);
+      setStudents((prev) => prev.filter((s) => s.id !== studentId));
+      setCounts((prev) => ({ ...prev, total: Math.max(0, prev.total - 1) }));
+      fetchStudents();
+    } catch (err: any) {
+      alert(err.message || "Failed to delete student");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   // Update URL helper
   const updateUrl = useCallback(
@@ -268,7 +291,7 @@ function StudentsContent() {
         <div className="bg-surface border border-border p-4 rounded-xl flex items-center justify-between">
           <div>
             <span className="text-xs text-ash uppercase font-medium tracking-wider">
-              Total Students
+              Total Enrolled Students
             </span>
             <div className="text-2xl font-bold text-whitesmoke mt-0.5">{counts.total}</div>
           </div>
@@ -282,19 +305,19 @@ function StudentsContent() {
           <div>
             <span className="text-xs text-accent uppercase font-bold tracking-wider flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-accent animate-ping" />
-              In Library (1)
+              Currently In Library
             </span>
             <div className="text-2xl font-bold text-whitesmoke mt-0.5">{counts.inLibrary}</div>
           </div>
           <span className="text-xs px-2.5 py-1 rounded bg-accent/20 border border-accent/40 text-accent font-semibold font-mono">
-            Active Stay
+            Studying Inside
           </span>
         </div>
 
         <div className="bg-surface border border-border p-4 rounded-xl flex items-center justify-between">
           <div>
             <span className="text-xs text-ash uppercase font-medium tracking-wider">
-              Outside (0)
+              Currently Outside
             </span>
             <div className="text-2xl font-bold text-whitesmoke mt-0.5">{counts.outside}</div>
           </div>
@@ -333,9 +356,9 @@ function StudentsContent() {
               onChange={(e) => handleInLibraryChange(e.target.value)}
               className="bg-bg border border-border rounded-lg px-3 py-2 text-xs text-whitesmoke focus:outline-none focus:border-accent"
             >
-              <option value="">All Statuses (0 & 1)</option>
-              <option value="1">1 • In Library Only</option>
-              <option value="0">0 • Outside Only</option>
+              <option value="">All Locations (Inside & Outside)</option>
+              <option value="1">Inside Library Only</option>
+              <option value="0">Outside Library Only</option>
             </select>
 
             {/* Category Dropdown */}
@@ -344,7 +367,7 @@ function StudentsContent() {
               onChange={(e) => handleCategoryChange(e.target.value)}
               className="bg-bg border border-border rounded-lg px-3 py-2 text-xs text-whitesmoke focus:outline-none focus:border-accent"
             >
-              <option value="">All Categories (Y1–Y4)</option>
+              <option value="">All Cohorts (1st–4th Year)</option>
               {CATEGORIES.map((cat) => (
                 <option key={cat} value={cat}>
                   {cat}
@@ -389,9 +412,75 @@ function StudentsContent() {
         </div>
       </div>
 
-      {/* Students Data Table */}
+      {/* Students Data Table & Mobile List */}
       <div className="bg-surface border border-border rounded-xl overflow-hidden shadow-sm">
-        <div className="overflow-x-auto">
+        {/* Mobile View: Touch-Friendly Student Cards (< md) */}
+        <div className="md:hidden divide-y divide-border">
+          {loading ? (
+            <div className="py-12 text-center text-ash flex flex-col items-center justify-center gap-2">
+              <RefreshCw className="w-5 h-5 animate-spin text-accent" />
+              <span>Loading student records...</span>
+            </div>
+          ) : students.length === 0 ? (
+            <div className="py-12 text-center text-ash p-4 space-y-2">
+              <Users className="w-8 h-8 text-ash/60 mx-auto" />
+              <p className="text-sm font-semibold text-whitesmoke">No students found</p>
+              <p className="text-xs text-ash">Try adjusting your filters or register a new student.</p>
+            </div>
+          ) : (
+            students.map((student) => (
+              <div key={student.id} className="p-4 space-y-3">
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <div className="font-bold text-sm text-whitesmoke">{student.fullName}</div>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="font-mono text-xs text-sand font-bold">{student.rollNumber}</span>
+                      <span className="text-[11px] px-2 py-0.5 rounded-full bg-sand-muted/50 border border-sand/30 text-sand font-semibold">
+                        {student.category}
+                      </span>
+                    </div>
+                  </div>
+                  <span
+                    className={`text-[11px] px-2.5 py-1 rounded-full font-bold inline-flex items-center gap-1.5 ${
+                      student.inLibrary === 1
+                        ? "bg-accent/20 text-accent border border-accent/40"
+                        : "bg-surface-raised text-ash border border-border"
+                    }`}
+                  >
+                    <span className={`w-1.5 h-1.5 rounded-full ${student.inLibrary === 1 ? "bg-accent animate-pulse" : "bg-ash"}`} />
+                    {student.inLibrary === 1 ? "In Library" : "Outside"}
+                  </span>
+                </div>
+
+                <div className="text-xs text-ash flex items-center justify-between">
+                  <span className="truncate max-w-[200px]">{student.department}</span>
+                  <span>{student.hostel || "Day Scholar"}</span>
+                </div>
+
+                <div className="flex items-center gap-2 pt-1 border-t border-border/40">
+                  <button
+                    onClick={() => setSelectedStudentForDrawer(student)}
+                    className="flex-1 py-2 px-3 rounded-lg bg-surface-raised border border-border text-xs font-semibold text-whitesmoke hover:bg-border flex items-center justify-center gap-1.5"
+                  >
+                    <Eye className="w-3.5 h-3.5 text-sand" />
+                    <span>View Timeline</span>
+                  </button>
+                  <button
+                    onClick={() => setDeleteConfirmStudent(student)}
+                    className="py-2 px-3 rounded-lg bg-red-500/10 border border-red-500/30 text-xs font-semibold text-red-400 hover:bg-red-500/20 flex items-center justify-center gap-1.5"
+                    title="Delete Student"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Delete</span>
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Desktop View: Full Table (md:) */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-surface-raised border-b border-border text-[11px] font-semibold text-ash uppercase tracking-wider">
@@ -579,11 +668,18 @@ function StudentsContent() {
                       <div className="flex items-center justify-end gap-1.5">
                         <button
                           onClick={() => setSelectedStudentForDrawer(student)}
-                          className="px-2.5 py-1 rounded bg-surface-raised hover:bg-border text-whitesmoke text-xs font-medium border border-border transition-colors flex items-center gap-1"
+                          className="px-2.5 py-1 rounded-lg bg-surface-raised hover:bg-border text-whitesmoke text-xs font-semibold border border-border transition-colors flex items-center gap-1"
                           title="View student timeline and actions"
                         >
                           <Eye className="w-3.5 h-3.5 text-sand" />
                           <span>View</span>
+                        </button>
+                        <button
+                          onClick={() => setDeleteConfirmStudent(student)}
+                          className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 transition-colors"
+                          title="Delete student"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </td>
@@ -672,7 +768,47 @@ function StudentsContent() {
         student={selectedStudentForDrawer}
         onCredentialsReset={handleCredentialsReset}
         onStatusUpdated={handleStatusUpdated}
+        onStudentDeleted={(id) => {
+          setStudents((prev) => prev.filter((s) => s.id !== id));
+          setCounts((prev) => ({ ...prev, total: Math.max(0, prev.total - 1) }));
+          setSelectedStudentForDrawer(null);
+          fetchStudents();
+        }}
       />
+
+      {/* Delete Confirmation Modal Dialog */}
+      {deleteConfirmStudent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+          <div className="bg-surface border border-border rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl animate-in zoom-in-95">
+            <div className="w-10 h-10 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center text-red-400">
+              <Trash2 className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-whitesmoke">Delete Student Record?</h3>
+              <p className="text-xs text-ash mt-1 leading-relaxed">
+                Are you sure you want to permanently delete <strong>{deleteConfirmStudent.fullName}</strong> ({deleteConfirmStudent.rollNumber})? This will remove their digital library pass and student profile.
+              </p>
+            </div>
+            <div className="flex gap-2 pt-1">
+              <button
+                onClick={() => handleDeleteStudent(deleteConfirmStudent.id)}
+                disabled={isDeleting}
+                className="flex-1 py-2.5 bg-red-500 text-white font-bold text-xs rounded-xl hover:bg-red-600 transition-colors flex items-center justify-center gap-1.5 shadow-md shadow-red-500/20"
+              >
+                {isDeleting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                <span>Delete Student</span>
+              </button>
+              <button
+                onClick={() => setDeleteConfirmStudent(null)}
+                disabled={isDeleting}
+                className="px-4 py-2.5 bg-surface-raised border border-border text-xs rounded-xl text-ash hover:text-whitesmoke transition-colors font-semibold"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

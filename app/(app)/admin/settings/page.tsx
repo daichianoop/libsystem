@@ -31,10 +31,10 @@ export default function SettingsAdminPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-whitesmoke tracking-tight">
-          System Configuration & Rules
+          System Settings & Rules
         </h1>
         <p className="text-xs text-ash mt-1">
-          State machine constants, security debounce windows, and institutional policies
+          Scanner timing rules, duplicate scan prevention, and library operating limits
         </p>
       </div>
 
@@ -43,13 +43,13 @@ export default function SettingsAdminPage() {
         <div className="bg-surface border border-border rounded-xl p-5 space-y-4">
           <h3 className="text-sm font-bold text-whitesmoke uppercase tracking-wider flex items-center gap-2">
             <Shield className="w-4 h-4 text-accent" />
-            <span>Cryptographic & Anti-Fraud Timing</span>
+            <span>Pass Security & Scan Protection</span>
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-xs font-medium text-ash uppercase tracking-wider block mb-1">
-                Duplicate Scan Debounce Window
+                Duplicate Scan Delay
               </label>
               <div className="flex items-center gap-2">
                 <input
@@ -61,13 +61,13 @@ export default function SettingsAdminPage() {
                 <span className="text-xs text-ash font-medium">seconds</span>
               </div>
               <p className="text-[11px] text-ash/80 mt-1">
-                Scans of the same card within this window are debounced as duplicate.
+                Prevents accidental double scans if the same student pass is shown twice in a row.
               </p>
             </div>
 
             <div>
               <label className="text-xs font-medium text-ash uppercase tracking-wider block mb-1">
-                Rotating QR Token Lifetime
+                Digital Pass Code Refresh Time
               </label>
               <div className="flex items-center gap-2">
                 <input
@@ -79,7 +79,7 @@ export default function SettingsAdminPage() {
                 <span className="text-xs text-ash font-medium">seconds</span>
               </div>
               <p className="text-[11px] text-ash/80 mt-1">
-                Prevents screenshot reuse. Tokens automatically expire after this period.
+                Prevents photo sharing. The barcode updates automatically so screenshots cannot be reused.
               </p>
             </div>
           </div>

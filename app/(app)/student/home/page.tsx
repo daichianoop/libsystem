@@ -59,7 +59,7 @@ export default async function StudentHomePage() {
                 inLibrary ? "bg-accent animate-ping" : "bg-ash"
               }`}
             />
-            <span>{inLibrary ? "1 • Currently In Library" : "0 • Currently Outside"}</span>
+            <span>{inLibrary ? "Inside Library" : "Outside Library"}</span>
           </div>
         </div>
 
@@ -94,11 +94,11 @@ export default async function StudentHomePage() {
           <div className="flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-sand" />
             <h3 className="text-sm font-bold text-whitesmoke uppercase tracking-wider">
-              Your Live ID Tag Pass
+              Digital Student Pass
             </h3>
           </div>
           <span className="text-[11px] text-ash">
-            Rotating Token (30s)
+            Refreshes automatically (30s)
           </span>
         </div>
 

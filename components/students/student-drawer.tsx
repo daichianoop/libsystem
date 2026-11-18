@@ -13,6 +13,7 @@ import {
   Calendar,
   Loader2,
   CheckCircle2,
+  Trash2,
 } from "lucide-react";
 import { StudentRecord } from "@/lib/server/students";
 
@@ -22,6 +23,7 @@ interface StudentDrawerProps {
   student: StudentRecord | null;
   onCredentialsReset: (credentials: { username: string; hashCode: string }) => void;
   onStatusUpdated: (updatedStudent: StudentRecord) => void;
+  onStudentDeleted?: (studentId: string) => void;
 }
 
 export function StudentDrawer({
@@ -30,12 +32,15 @@ export function StudentDrawer({
   student,
   onCredentialsReset,
   onStatusUpdated,
+  onStudentDeleted,
 }: StudentDrawerProps) {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyData, setHistoryData] = useState<any>(null);
   const [resetting, setResetting] = useState(false);
   const [togglingActive, setTogglingActive] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!isOpen || !student) {
@@ -100,6 +105,28 @@ export function StudentDrawer({
       alert(err.message || "Status toggle failed.");
     } finally {
       setTogglingActive(false);
+    }
+  };
+
+  const handleDeleteStudent = async () => {
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/students/${student.id}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error?.message || "Failed to remove student.");
+      }
+      setConfirmDelete(false);
+      if (onStudentDeleted) {
+        onStudentDeleted(student.id);
+      }
+      onClose();
+    } catch (err: any) {
+      alert(err.message || "Failed to delete student.");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -199,13 +226,13 @@ export function StudentDrawer({
             {confirmReset ? (
               <div className="p-3.5 bg-amber-500/10 border border-amber-500/30 rounded-xl space-y-2.5">
                 <p className="text-xs text-amber-200">
-                  Generate a new high-entropy password for <strong>{student.username}</strong>? The current password will stop working immediately.
+                  Reset password for <strong>{student.fullName}</strong> ({student.username})? A new temporary pass code will be generated immediately.
                 </p>
                 <div className="flex gap-2">
                   <button
                     onClick={handleResetCredentials}
                     disabled={resetting}
-                    className="flex-1 px-3 py-1.5 bg-accent text-bg font-semibold text-xs rounded-lg hover:bg-accent-hover transition-colors flex items-center justify-center gap-1.5"
+                    className="flex-1 px-3 py-2 bg-accent text-bg font-bold text-xs rounded-lg hover:bg-accent-hover transition-colors flex items-center justify-center gap-1.5"
                   >
                     {resetting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                     <span>Confirm Reset</span>
@@ -213,39 +240,73 @@ export function StudentDrawer({
                   <button
                     onClick={() => setConfirmReset(false)}
                     disabled={resetting}
-                    className="px-3 py-1.5 bg-surface-raised border border-border text-xs rounded-lg text-ash hover:text-whitesmoke transition-colors"
+                    className="px-3 py-2 bg-surface-raised border border-border text-xs rounded-lg text-ash hover:text-whitesmoke transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : confirmDelete ? (
+              <div className="p-3.5 bg-red-500/10 border border-red-500/30 rounded-xl space-y-2.5">
+                <p className="text-xs text-red-200">
+                  Permanently delete <strong>{student.fullName}</strong> ({student.rollNumber})? This will remove their digital library pass and student record.
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleDeleteStudent}
+                    disabled={deleting}
+                    className="flex-1 px-3 py-2 bg-red-500 text-white font-bold text-xs rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center gap-1.5"
+                  >
+                    {deleting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Delete Student</span>
+                  </button>
+                  <button
+                    onClick={() => setConfirmDelete(false)}
+                    disabled={deleting}
+                    className="px-3 py-2 bg-surface-raised border border-border text-xs rounded-lg text-ash hover:text-whitesmoke transition-colors"
                   >
                     Cancel
                   </button>
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-2.5">
-                <button
-                  onClick={() => setConfirmReset(true)}
-                  className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg bg-surface-raised border border-border text-xs font-medium text-whitesmoke hover:border-accent/60 transition-colors"
-                >
-                  <KeyRound className="w-4 h-4 text-accent" />
-                  <span>Reset Password</span>
-                </button>
+              <div className="space-y-2">
+                <div className="grid grid-cols-2 gap-2.5">
+                  <button
+                    onClick={() => setConfirmReset(true)}
+                    className="flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg bg-surface-raised border border-border text-xs font-semibold text-whitesmoke hover:border-accent/60 transition-colors"
+                  >
+                    <KeyRound className="w-4 h-4 text-accent" />
+                    <span>Reset Password</span>
+                  </button>
+
+                  <button
+                    onClick={handleToggleActive}
+                    disabled={togglingActive}
+                    className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border text-xs font-semibold transition-colors ${
+                      student.isActive
+                        ? "bg-amber-500/10 border-amber-500/30 text-amber-300 hover:bg-amber-500/20"
+                        : "bg-green-500/10 border-green-500/30 text-green-300 hover:bg-green-500/20"
+                    }`}
+                  >
+                    {togglingActive ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : student.isActive ? (
+                      <ShieldAlert className="w-4 h-4" />
+                    ) : (
+                      <ShieldCheck className="w-4 h-4" />
+                    )}
+                    <span>{student.isActive ? "Suspend Access" : "Activate Access"}</span>
+                  </button>
+                </div>
 
                 <button
-                  onClick={handleToggleActive}
-                  disabled={togglingActive}
-                  className={`flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg border text-xs font-medium transition-colors ${
-                    student.isActive
-                      ? "bg-red-500/10 border-red-500/30 text-red-300 hover:bg-red-500/20"
-                      : "bg-green-500/10 border-green-500/30 text-green-300 hover:bg-green-500/20"
-                  }`}
+                  onClick={() => setConfirmDelete(true)}
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 text-xs font-semibold transition-colors"
                 >
-                  {togglingActive ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  ) : student.isActive ? (
-                    <ShieldAlert className="w-4 h-4" />
-                  ) : (
-                    <ShieldCheck className="w-4 h-4" />
-                  )}
-                  <span>{student.isActive ? "Deactivate" : "Activate"}</span>
+                  <Trash2 className="w-4 h-4" />
+                  <span>Delete Student from System</span>
                 </button>
               </div>
             )}

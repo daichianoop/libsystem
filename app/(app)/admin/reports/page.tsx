@@ -20,10 +20,10 @@ export default async function ReportsAdminPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-whitesmoke tracking-tight">
-            Library Analytics & Reports
+            Library Reports & Attendance
           </h1>
           <p className="text-xs text-ash mt-1">
-            Usage trends, stay duration metrics, and institutional export summaries
+            Visit statistics, peak study hours, and student attendance overview
           </p>
         </div>
 
@@ -32,7 +32,7 @@ export default async function ReportsAdminPage() {
           className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-surface-raised border border-border text-xs font-semibold text-whitesmoke hover:bg-border transition-colors self-start sm:self-auto"
         >
           <Download className="w-4 h-4 text-sand" />
-          <span>Export Complete Dataset (.csv)</span>
+          <span>Download Complete Report (.csv)</span>
         </a>
       </div>
 
@@ -41,7 +41,7 @@ export default async function ReportsAdminPage() {
         <div className="bg-surface border border-border p-5 rounded-xl">
           <div className="flex items-center gap-2 text-xs text-ash">
             <TrendingUp className="w-4 h-4 text-accent" />
-            <span className="uppercase font-medium">Average Stay Duration</span>
+            <span className="uppercase font-medium">Average Visit Duration</span>
           </div>
           <div className="text-3xl font-extrabold text-whitesmoke font-mono mt-2">
             104 <span className="text-sm font-normal text-ash">minutes</span>
@@ -57,7 +57,7 @@ export default async function ReportsAdminPage() {
           <div className="text-2xl font-extrabold text-whitesmoke font-mono mt-2">
             19:30 – 22:00
           </div>
-          <p className="text-xs text-ash mt-1">Highest checkpoint concurrency</p>
+          <p className="text-xs text-ash mt-1">Busiest time of evening</p>
         </div>
 
         <div className="bg-surface border border-border p-5 rounded-xl">
@@ -75,18 +75,18 @@ export default async function ReportsAdminPage() {
       {/* Year-Wise Engagement Table */}
       <div className="bg-surface border border-border rounded-xl p-5 space-y-4">
         <h3 className="text-sm font-bold text-whitesmoke uppercase tracking-wider">
-          Student Engagement by Academic Cohort
+          Attendance by Academic Year
         </h3>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="bg-surface-raised text-ash font-semibold uppercase text-[10px] tracking-wider border-b border-border">
-                <th className="py-2.5 px-3">Cohort</th>
-                <th className="py-2.5 px-3">Active In Library</th>
-                <th className="py-2.5 px-3">Enrolled Total</th>
-                <th className="py-2.5 px-3">Attendance Ratio</th>
-                <th className="py-2.5 px-3">Avg Stay</th>
+                <th className="py-2.5 px-3">Academic Year</th>
+                <th className="py-2.5 px-3">In Library Now</th>
+                <th className="py-2.5 px-3">Total Students</th>
+                <th className="py-2.5 px-3">Attendance Rate</th>
+                <th className="py-2.5 px-3">Average Visit Duration</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">

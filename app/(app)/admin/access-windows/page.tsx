@@ -62,17 +62,17 @@ export default async function AccessWindowsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-whitesmoke tracking-tight">
-            Strict Access Windows & Timings
+            Library Opening Hours & Timings
           </h1>
           <p className="text-xs text-ash mt-1">
-            Server-side temporal gating enforced strictly in Asia/Kolkata (IST) time zone
+            Official library access hours for students and staff (Indian Standard Time)
           </p>
         </div>
 
         {/* Live IST Server Clock */}
         <div className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-surface border border-accent/40 text-xs font-mono">
           <Clock className="w-4 h-4 text-accent animate-pulse" />
-          <span className="text-ash">IST Server Time:</span>
+          <span className="text-ash">Current Time:</span>
           <span className="text-whitesmoke font-bold">
             {new Date().toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata" })} IST
           </span>
@@ -83,7 +83,7 @@ export default async function AccessWindowsPage() {
       <div className="p-4 bg-accent/10 border border-accent/30 rounded-xl flex items-start gap-3 text-xs text-whitesmoke leading-relaxed">
         <Lock className="w-5 h-5 text-accent shrink-0 mt-0.5" />
         <div>
-          <strong className="text-accent font-semibold">Strict Server-Clock Enforcement:</strong> Outside configured access hours, requests from non-admin accounts are blocked server-side by middleware and API routes (`403 OUTSIDE_ACCESS_WINDOW`), and the web portal displays the scheduled `/closed` countdown screen.
+          <strong className="text-accent font-semibold">Automatic Timing Control:</strong> Outside configured library hours, students and staff will see the "Library Closed" notice showing when the library opens next. System administrators can access the portal at any time.
         </div>
       </div>
 

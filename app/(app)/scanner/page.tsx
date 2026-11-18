@@ -498,7 +498,7 @@ export default function MobileScannerView() {
                   : "text-ash hover:text-whitesmoke"
               }`}
             >
-              Auto (0 ↔ 1)
+              Auto (In & Out)
             </button>
             <button
               onClick={() => setScanMode("ENTRY_ONLY")}
@@ -508,7 +508,7 @@ export default function MobileScannerView() {
                   : "text-ash hover:text-whitesmoke"
               }`}
             >
-              In Only
+              Check In
             </button>
             <button
               onClick={() => setScanMode("EXIT_ONLY")}
@@ -518,7 +518,7 @@ export default function MobileScannerView() {
                   : "text-ash hover:text-whitesmoke"
               }`}
             >
-              Out Only
+              Check Out
             </button>
           </div>
         </div>
@@ -709,7 +709,7 @@ export default function MobileScannerView() {
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-20">
                       <div className="bg-surface border border-border px-4 py-2.5 rounded-2xl flex items-center gap-2.5 text-xs font-bold text-whitesmoke shadow-2xl">
                         <Loader2 className="w-4 h-4 text-accent animate-spin" />
-                        <span>Verifying Student Card...</span>
+                        <span>Verifying Student Pass...</span>
                       </div>
                     </div>
                   )}
@@ -717,7 +717,7 @@ export default function MobileScannerView() {
                   {/* Target Guide Text */}
                   <div className="absolute bottom-3 inset-x-0 text-center pointer-events-none">
                     <span className="bg-bg/80 backdrop-blur-md px-3 py-1 rounded-full border border-border text-[10px] text-ash font-medium shadow-sm">
-                      Align student rotating QR token within target box
+                      Align the student QR pass inside the target box
                     </span>
                   </div>
                 </>
@@ -946,11 +946,11 @@ export default function MobileScannerView() {
                   <span className="text-xs font-bold uppercase tracking-wider">
                     {lastResult.status === "ACCEPTED"
                       ? lastResult.eventType === "LIBRARY_ENTRY"
-                        ? "✓ Entry Granted (0 → 1)"
-                        : "✓ Exit Recorded (1 → 0)"
+                        ? "✓ Entry Verified (Checked In)"
+                        : "✓ Exit Verified (Checked Out)"
                       : lastResult.status === "DUPLICATE"
-                      ? "⚠ Duplicate Debounce (10s)"
-                      : "✕ Scan Rejected"}
+                      ? "⚠ Already Scanned (Wait 10s)"
+                      : "✕ Pass Rejected"}
                   </span>
                   <span className="text-[10px] font-mono text-ash">{lastResult.timestamp}</span>
                 </div>
@@ -970,13 +970,13 @@ export default function MobileScannerView() {
                       </span>
                     </div>
                     <div>
-                      <span className="text-[10px] text-ash uppercase block">Category / Dept</span>
+                      <span className="text-[10px] text-ash uppercase block">Cohort / Dept</span>
                       <span className="truncate block text-whitesmoke">
                         {lastResult.student.category}
                       </span>
                     </div>
                     <div>
-                      <span className="text-[10px] text-ash uppercase block">Current Status</span>
+                      <span className="text-[10px] text-ash uppercase block">Current Location</span>
                       <span
                         className={`font-semibold inline-block px-2 py-0.5 rounded-md text-[11px] ${
                           lastResult.targetInLibrary === 1
@@ -984,7 +984,7 @@ export default function MobileScannerView() {
                             : "bg-surface-raised text-ash"
                         }`}
                       >
-                        {lastResult.targetInLibrary === 1 ? "1 • In Library" : "0 • Outside"}
+                        {lastResult.targetInLibrary === 1 ? "Inside Library" : "Outside Library"}
                       </span>
                     </div>
                   </div>
@@ -998,7 +998,7 @@ export default function MobileScannerView() {
       {/* Footer info */}
       <footer className="bg-surface border-t border-border px-4 py-2 text-center text-[10px] text-ash flex items-center justify-between">
         <span className="truncate">Checkpoint: {CHECKPOINTS.find((c) => c.id === selectedCheckpoint)?.name}</span>
-        <span className="text-sand font-mono shrink-0 ml-2">State Machine: Active</span>
+        <span className="text-sand font-mono shrink-0 ml-2">Live Cloud Sync: Connected</span>
       </footer>
     </div>
   );

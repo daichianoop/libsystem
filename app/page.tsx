@@ -75,19 +75,19 @@ export default async function LandingPage() {
       <section className="py-12 md:py-16 px-6 max-w-7xl mx-auto w-full text-center space-y-6">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface border border-border text-xs text-sand font-medium">
           <Sparkles className="w-3.5 h-3.5 text-accent" />
-          <span>Modernizing Central Library Paper Passes with Cryptographic QR ID Tags</span>
+          <span>Modernizing Central Library Paper Passes with Secure Digital ID Cards</span>
         </div>
 
         <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-whitesmoke max-w-3xl mx-auto leading-tight">
           One Institutional Pass. <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent via-sand to-accent-hover">
-            Instant Scan. Tamper-Proof Movement.
+            Instant Scan. Safe & Simple Movement.
           </span>
         </h2>
 
         <p className="text-sm md:text-base text-ash max-w-2xl mx-auto leading-relaxed">
-          Select your destination below to log in. The system guarantees accurate occupancy metrics,
-          prevents screenshot fraud with rotating QR tags, and strictly enforces campus access timings.
+          Select your portal below to sign in. The system keeps live student counts,
+          prevents screenshot sharing with refreshing pass codes, and manages library study hours.
         </p>
 
         {/* 3 Portal Selection Cards */}
@@ -110,8 +110,8 @@ export default async function LandingPage() {
                   Student Digital Pass
                 </h3>
                 <p className="text-xs text-ash mt-1.5 leading-relaxed">
-                  Display your live dynamic ID tag, view your current status (In Library / Outside),
-                  track stay duration, and review personal check-in history.
+                  Display your digital library card, check your current status (In Library or Outside),
+                  see how long you've been studying, and view your visit history.
                 </p>
               </div>
 
@@ -121,8 +121,8 @@ export default async function LandingPage() {
                   <strong className="text-accent font-mono">student / student123</strong>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span>Status Pill:</span>
-                  <span className="text-whitesmoke font-semibold">0 (Out) / 1 (In)</span>
+                  <span>Study Window:</span>
+                  <span className="text-whitesmoke font-semibold">17:00 – 23:30 Daily</span>
                 </div>
               </div>
             </div>
@@ -156,8 +156,8 @@ export default async function LandingPage() {
                   Scanner Terminal
                 </h3>
                 <p className="text-xs text-ash mt-1.5 leading-relaxed">
-                  High-throughput camera scanner for entry/exit gates and turnstiles. Features
-                  instant audio/haptic feedback, manual fallback, and offline queueing.
+                  Fast camera scanner for entry and exit gates. Features instant sound confirmation,
+                  torch light toggle, front/back camera switch, and roll number search.
                 </p>
               </div>
 
@@ -167,8 +167,8 @@ export default async function LandingPage() {
                   <strong className="text-sand font-mono">scanner / scanner123</strong>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span>Concurrency Lock:</span>
-                  <span className="text-success font-semibold">Row-Level (FOR UPDATE)</span>
+                  <span>Scanner Mode:</span>
+                  <span className="text-success font-semibold">Automatic In & Out</span>
                 </div>
               </div>
             </div>
@@ -202,8 +202,8 @@ export default async function LandingPage() {
                   Admin Management
                 </h3>
                 <p className="text-xs text-ash mt-1.5 leading-relaxed">
-                  Live occupancy overview, multi-filter student roster (by category, in_library 0/1),
-                  single-display credential issuing, access windows, and immutable audit logs.
+                  Real-time occupancy numbers, student directory with filters, register new students,
+                  delete unwanted students, reset credentials, and download reports.
                 </p>
               </div>
 
@@ -213,8 +213,8 @@ export default async function LandingPage() {
                   <strong className="text-accent font-mono">admin / admin123</strong>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span>Audit Trail:</span>
-                  <span className="text-warning font-semibold">Immutable (Trigger-Gated)</span>
+                  <span>Access:</span>
+                  <span className="text-whitesmoke font-semibold">24/7 Full Control</span>
                 </div>
               </div>
             </div>
@@ -236,48 +236,48 @@ export default async function LandingPage() {
       <section className="py-12 px-6 border-t border-border bg-surface/40">
         <div className="max-w-7xl mx-auto space-y-8">
           <div className="text-center max-w-xl mx-auto space-y-2">
-            <h3 className="text-xl font-bold text-whitesmoke tracking-tight">Institutional Architecture & Governance</h3>
-            <p className="text-xs text-ash">Built from the ground up for strict campus security, privacy, and regulatory adherence.</p>
+            <h3 className="text-xl font-bold text-whitesmoke tracking-tight">Key System Safeguards</h3>
+            <p className="text-xs text-ash">Designed for campus safety, student convenience, and reliable gate verification.</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-surface border border-border p-5 rounded-card space-y-2.5">
               <div className="flex items-center gap-2 text-accent font-semibold text-xs">
                 <Lock className="w-4 h-4" />
-                <span>Rotating QR Tag</span>
+                <span>Anti-Screenshot Pass</span>
               </div>
               <p className="text-xs text-ash leading-relaxed">
-                Tokens rotate every 30 seconds via HMAC-SHA256 signatures. Screenshots die within one minute, preventing unauthorized sharing.
+                Pass codes refresh automatically every 30 seconds. Screenshots quickly expire, making it impossible to share passes with friends.
               </p>
             </div>
 
             <div className="bg-surface border border-border p-5 rounded-card space-y-2.5">
               <div className="flex items-center gap-2 text-sand font-semibold text-xs">
                 <Clock className="w-4 h-4" />
-                <span>Server-Enforced Windows</span>
+                <span>Scheduled Study Hours</span>
               </div>
               <p className="text-xs text-ash leading-relaxed">
-                All login and viewing access windows are strictly calculated in Asia/Kolkata (IST). Sessions automatically lock outside study hours.
+                Library hours are clearly displayed. The system shows when gates are open and reminds students before closing time.
               </p>
             </div>
 
             <div className="bg-surface border border-border p-5 rounded-card space-y-2.5">
               <div className="flex items-center gap-2 text-success font-semibold text-xs">
                 <Layers className="w-4 h-4" />
-                <span>State Machine Locking</span>
+                <span>Accurate Headcount</span>
               </div>
               <p className="text-xs text-ash leading-relaxed">
-                Database-level transactional RPC with row-level locks guarantees that high-volume rush hours never produce phantom check-ins.
+                Smart scan verification prevents accidental double scans at the gates and ensures the live library count is always accurate.
               </p>
             </div>
 
             <div className="bg-surface border border-border p-5 rounded-card space-y-2.5">
               <div className="flex items-center gap-2 text-warning font-semibold text-xs">
                 <CheckCircle2 className="w-4 h-4" />
-                <span>Immutable Audit Trail</span>
+                <span>Complete Activity History</span>
               </div>
               <p className="text-xs text-ash leading-relaxed">
-                Postgres triggers block UPDATE and DELETE operations on movement events. Corrections are strictly additive and audited.
+                Every entry, exit, and administrative action is safely recorded so staff and students have a clear log of library visits.
               </p>
             </div>
           </div>
@@ -289,10 +289,10 @@ export default async function LandingPage() {
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <p>© {new Date().getFullYear()} Central Library & Hostel Board. All rights reserved.</p>
           <div className="flex items-center gap-4 text-[11px]">
-            <span>Hardcoded / Database Local Auth</span>
+            <span>Secure Campus System</span>
             <span>•</span>
             <Link href="/api/health" className="hover:text-whitesmoke underline underline-offset-4">
-              System Health Check
+              System Status Check
             </Link>
           </div>
         </div>

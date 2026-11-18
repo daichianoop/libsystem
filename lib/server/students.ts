@@ -860,6 +860,73 @@ export async function updateStudent(
   return safe;
 }
 
+export async function deleteStudent(
+  studentId: string,
+  actorProfileId: string,
+  clientIp?: string
+): Promise<{ success: boolean; id: string }> {
+  let rollNumber = "";
+  let fullName = "";
+
+  if (isSupabaseAvailable()) {
+    try {
+      const supabase = getAdminSupabase();
+      const { data: std } = await supabase
+        .from("students")
+        .select("id, profile_id, roll_number, full_name")
+        .eq("id", studentId)
+        .maybeSingle();
+
+      if (std) {
+        rollNumber = std.roll_number;
+        fullName = std.full_name;
+
+        // Delete student record
+        await supabase.from("students").delete().eq("id", studentId);
+
+        // Delete associated login profile
+        if (std.profile_id) {
+          await supabase.from("profiles").delete().eq("id", std.profile_id);
+        }
+
+        await logAuditEvent({
+          actorProfileId,
+          action: "STUDENT_DELETED",
+          entityType: "student",
+          entityId: studentId,
+          metadata: { rollNumber, fullName },
+          ip: clientIp,
+        });
+
+        studentsMap.delete(studentId);
+        return { success: true, id: studentId };
+      }
+    } catch {
+      markSupabaseUnreachable();
+    }
+  }
+
+  const s = studentsMap.get(studentId);
+  if (!s) {
+    throw new Error(`Student with ID ${studentId} not found.`);
+  }
+
+  rollNumber = s.rollNumber;
+  fullName = s.fullName;
+  studentsMap.delete(studentId);
+
+  await logAuditEvent({
+    actorProfileId,
+    action: "STUDENT_DELETED",
+    entityType: "student",
+    entityId: studentId,
+    metadata: { rollNumber, fullName },
+    ip: clientIp,
+  });
+
+  return { success: true, id: studentId };
+}
+
 export async function updateStudentScanStatus(
   studentId: string,
   inLibrary: 0 | 1

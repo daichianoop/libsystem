@@ -153,7 +153,7 @@ export function IdTag({
               student.inLibrary === 1 ? "bg-accent animate-ping" : "bg-ash"
             }`}
           />
-          <span>{student.inLibrary === 1 ? "1 • In Library" : "0 • Outside"}</span>
+          <span>{student.inLibrary === 1 ? "Inside Library" : "Outside Library"}</span>
         </div>
       </div>
 
@@ -217,7 +217,7 @@ export function IdTag({
               }`}
             >
               <Clock className="w-3 h-3 text-accent" />
-              <span>Token rotates in:</span>
+              <span>Pass code updates in:</span>
             </span>
             <span
               className={`font-bold ${
@@ -252,7 +252,7 @@ export function IdTag({
                 brightnessBoost ? "text-neutral-500" : "text-ash"
               }`}
             >
-              Anti-Screenshot Cryptographic Payload
+              Live Digital Pass Security Code
             </div>
             <div
               className={`text-[11px] font-mono font-medium truncate max-w-[240px] mt-0.5 ${

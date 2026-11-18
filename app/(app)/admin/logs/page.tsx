@@ -50,10 +50,10 @@ export default async function AuditLogsAdminPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-whitesmoke tracking-tight">
-            Security & Audit Trail
+            Activity History & Security Log
           </h1>
           <p className="text-xs text-ash mt-1">
-            Immutable administrative audit logs, credential transactions, and session activity
+            Complete record of administrative actions, password resets, student updates, and logins
           </p>
         </div>
       </div>
@@ -64,7 +64,7 @@ export default async function AuditLogsAdminPage() {
           <div className="flex items-center gap-2">
             <ShieldAlert className="w-4 h-4 text-accent" />
             <h3 className="text-sm font-bold text-whitesmoke uppercase tracking-wider">
-              Immutable Administrative Audit Log
+              Recent Administrative Actions
             </h3>
           </div>
           <span className="text-xs text-sand font-mono">
@@ -76,11 +76,11 @@ export default async function AuditLogsAdminPage() {
           <table className="w-full text-left border-collapse text-xs">
             <thead>
               <tr className="bg-surface-raised text-ash font-semibold uppercase text-[10px] tracking-wider border-b border-border">
-                <th className="py-2.5 px-3">Action</th>
-                <th className="py-2.5 px-3">Entity Type</th>
-                <th className="py-2.5 px-3">Actor</th>
-                <th className="py-2.5 px-3">Metadata Snapshot</th>
-                <th className="py-2.5 px-3">Timestamp (IST)</th>
+                <th className="py-2.5 px-3">Event</th>
+                <th className="py-2.5 px-3">Category</th>
+                <th className="py-2.5 px-3">Performed By</th>
+                <th className="py-2.5 px-3">Details</th>
+                <th className="py-2.5 px-3">Time</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">

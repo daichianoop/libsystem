@@ -30,9 +30,9 @@ export default async function StudentHistoryPage() {
             <ArrowLeft className="w-4 h-4" />
           </Link>
           <div>
-            <h1 className="text-xl font-bold text-whitesmoke">My Movement History</h1>
+            <h1 className="text-xl font-bold text-whitesmoke">My Library Visits</h1>
             <p className="text-xs text-ash">
-              Recorded library entry and exit checkpoints
+              Recorded library entry and exit scans
             </p>
           </div>
         </div>
@@ -47,14 +47,14 @@ export default async function StudentHistoryPage() {
           </div>
         </div>
         <div className="bg-surface border border-border p-4 rounded-xl text-center">
-          <span className="text-[11px] text-ash uppercase font-medium">Current Status</span>
+          <span className="text-[11px] text-ash uppercase font-medium">Current Location</span>
           <div className="text-sm font-bold text-accent mt-1">
-            {student?.inLibrary === 1 ? "1 • Inside" : "0 • Outside"}
+            {student?.inLibrary === 1 ? "In Library" : "Outside"}
           </div>
         </div>
         <div className="bg-surface border border-border p-4 rounded-xl text-center">
-          <span className="text-[11px] text-ash uppercase font-medium">Compliance</span>
-          <div className="text-sm font-bold text-green-400 mt-1">100% Verified</div>
+          <span className="text-[11px] text-ash uppercase font-medium">Status</span>
+          <div className="text-sm font-bold text-green-400 mt-1">Verified</div>
         </div>
       </div>
 

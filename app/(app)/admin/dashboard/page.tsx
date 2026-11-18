@@ -34,11 +34,11 @@ export default async function AdminDashboardPage() {
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-accent animate-pulse" />
             <h1 className="text-2xl font-bold text-whitesmoke tracking-tight">
-              Operational Command Center
+              Library Overview & Live Activity
             </h1>
           </div>
           <p className="text-xs text-ash mt-1">
-            Realtime library occupancy, student movements, and pass management
+            Current occupancy, live student check-ins, and digital pass tracking
           </p>
         </div>
 
@@ -48,7 +48,7 @@ export default async function AdminDashboardPage() {
             className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-surface-raised border border-border text-xs font-semibold text-whitesmoke hover:bg-border transition-colors"
           >
             <QrCode className="w-4 h-4 text-sand" />
-            <span>Launch Scanner</span>
+            <span>Open Scanner</span>
           </Link>
 
           <Link

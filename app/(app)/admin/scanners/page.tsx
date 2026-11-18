@@ -22,10 +22,10 @@ export default async function ScannersAdminPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-whitesmoke tracking-tight">
-            Scanner Terminals & Checkpoints
+            Scanner Stations & Checkpoints
           </h1>
           <p className="text-xs text-ash mt-1">
-            Physical turnstiles, gate assignments, and optical scanner verification stations
+            Library gates, entry checkpoints, and camera scanner stations
           </p>
         </div>
 
@@ -34,7 +34,7 @@ export default async function ScannersAdminPage() {
           className="flex items-center gap-2 px-4 py-2 rounded-lg bg-accent text-bg font-bold text-xs hover:bg-accent-hover transition-colors shadow-lg shadow-accent/10"
         >
           <QrCode className="w-4 h-4" />
-          <span>Launch Scanner Terminal</span>
+          <span>Open Pass Scanner</span>
         </Link>
       </div>
 

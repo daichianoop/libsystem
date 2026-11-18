@@ -5,6 +5,7 @@ import {
   getStudentById,
   toggleStudentActive,
   updateStudent,
+  deleteStudent,
 } from "@/lib/server/students";
 
 const PatchStudentSchema = z.object({
@@ -97,6 +98,26 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     }
 
     return NextResponse.json({ success: true, student: updatedStudent });
+  } catch (err: any) {
+    return NextResponse.json(
+      { error: { code: err.code || "INTERNAL_ERROR", message: err.message } },
+      { status: err.statusCode || 500 }
+    );
+  }
+}
+
+/**
+ * DELETE /api/students/[id]
+ * Permanently removes a student record and linked account. Admin only.
+ */
+export async function DELETE(req: NextRequest, { params }: RouteParams) {
+  try {
+    const admin = await requireRole(["admin"]);
+    const { id } = await params;
+    const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "127.0.0.1";
+
+    const result = await deleteStudent(id, admin.profileId, ip);
+    return NextResponse.json(result);
   } catch (err: any) {
     return NextResponse.json(
       { error: { code: err.code || "INTERNAL_ERROR", message: err.message } },

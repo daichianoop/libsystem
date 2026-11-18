@@ -26,7 +26,7 @@ export default async function AdminLayout({
                 <h2 className="text-sm font-bold text-whitesmoke tracking-tight group-hover:text-accent transition-colors">
                   Library Admin
                 </h2>
-                <p className="text-[11px] text-ash">Movement Governance</p>
+                <p className="text-[11px] text-ash">Hostel & Library Pass System</p>
               </div>
             </Link>
             <div className="md:hidden">
@@ -42,7 +42,7 @@ export default async function AdminLayout({
             >
               <div className="flex items-center gap-2">
                 <QrCode className="w-3.5 h-3.5 text-accent" />
-                <span>Scanner Terminal</span>
+                <span>Open Pass Scanner</span>
               </div>
               <ExternalLink className="w-3 h-3 text-ash group-hover:text-whitesmoke" />
             </Link>
