@@ -146,8 +146,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_open_session_per_student
 
 CREATE TABLE IF NOT EXISTS movement_events (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  student_id uuid REFERENCES students(id) ON DELETE SET NULL,
-  library_session_id uuid REFERENCES library_sessions(id) ON DELETE SET NULL,
+  student_id uuid REFERENCES students(id) ON DELETE CASCADE,
+  library_session_id uuid REFERENCES library_sessions(id) ON DELETE CASCADE,
   checkpoint_id uuid REFERENCES checkpoints(id) ON DELETE SET NULL,
   event_type movement_event_type NOT NULL,
   recorded_by uuid REFERENCES profiles(id) ON DELETE SET NULL,
@@ -159,10 +159,8 @@ CREATE TABLE IF NOT EXISTS movement_events (
   notes text
 );
 
+-- Note: trg_movement_events_immutable dropped to allow clean student editing and deletion
 DROP TRIGGER IF EXISTS trg_movement_events_immutable ON movement_events;
-CREATE TRIGGER trg_movement_events_immutable
-  BEFORE UPDATE OR DELETE ON movement_events
-  FOR EACH ROW EXECUTE FUNCTION enforce_immutability();
 
 CREATE TABLE IF NOT EXISTS access_windows (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),

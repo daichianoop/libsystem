@@ -881,8 +881,15 @@ export async function deleteStudent(
         rollNumber = std.roll_number;
         fullName = std.full_name;
 
+        // Clean up linked movement events and library sessions if any exist
+        await supabase.from("movement_events").delete().eq("student_id", studentId);
+        await supabase.from("library_sessions").delete().eq("student_id", studentId);
+
         // Delete student record
-        await supabase.from("students").delete().eq("id", studentId);
+        const { error: sErr } = await supabase.from("students").delete().eq("id", studentId);
+        if (sErr) {
+          throw new Error(sErr.message || "Failed to delete student from Supabase");
+        }
 
         // Delete associated login profile
         if (std.profile_id) {
